@@ -42,7 +42,7 @@ const Comment = ({updateIsEditing = null, isEditing, ...props}) => {
         setIsInReplyMode(false);
     };
 
-    const {admin, avatarSaturation, member, commentsEnabled} = useContext(AppContext);
+    const {admin, avatarSaturation, member, commentsEnabled, focusedComment} = useContext(AppContext);
     let comment = props.comment;
     const hasReplies = comment.replies && comment.replies.length > 0;
     const isNotPublished = comment.status !== 'published';
@@ -60,6 +60,7 @@ const Comment = ({updateIsEditing = null, isEditing, ...props}) => {
     const paidOnly = commentsEnabled === 'paid';
     const isPaidMember = member && !!member.paid;
     const canReply = member && (isPaidMember || !paidOnly);
+    const isFocused = comment.id === focusedComment?.id;
 
     // If this comment is from the current member, always override member
     // with the member from the context, so we update the bio in existing comments when we change it
@@ -81,7 +82,7 @@ const Comment = ({updateIsEditing = null, isEditing, ...props}) => {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
             >
-                <div className={`flex flex-row ${hasReplies ? 'mb-2 sm:mb-4' : 'mb-6 sm:mb-10'}`}>
+                <div className={`flex flex-row ${hasReplies ? 'mb-2 sm:mb-4' : 'mb-6 sm:mb-10'} ${isFocused ? ' border-2 border-indigo-600' : ''}`} id={`gh-comment-${comment.id}`}>
                     <div>
                         <div className="flex items-center mb-2 h-12">
                             <div className="mr-3">

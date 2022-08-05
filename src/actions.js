@@ -3,12 +3,36 @@ async function loadMoreComments({state, api}) {
     if (state.pagination && state.pagination.page) {
         page = state.pagination.page + 1;
     }
-    const data = await api.comments.browse({page, postId: state.postId});
+    let after = undefined;
+
+    if (state.focusedComment) {
+        after = state.focusedComment.parent_id ?? state.focusedComment.id;
+    }
+    const data = await api.comments.browse({page, postId: state.postId, after});
 
     // Note: we store the comments from new to old, and show them in reverse order
     return {
         comments: [...state.comments, ...data.comments],
         pagination: data.meta.pagination
+    };
+}
+
+async function loadFutureComments({state, api}) {
+    let page = 1;
+    if (state.futurePagination && state.futurePagination.page) {
+        page = state.futurePagination.page + 1;
+    }
+    let before = undefined;
+
+    if (state.focusedComment) {
+        before = state.focusedComment.parent_id ?? state.focusedComment.id;
+    }
+    const data = await api.comments.browse({page, postId: state.postId, before, order: 'ASC'});
+
+    // Note: we store the comments from new to old, and show them in reverse order
+    return {
+        comments: [...data.comments.reverse(), ...state.comments],
+        futurePagination: data.meta.pagination
     };
 }
 
@@ -318,6 +342,7 @@ const Actions = {
     reportComment,
     addReply,
     loadMoreComments,
+    loadFutureComments,
     updateMember,
     openPopup,
     closePopup

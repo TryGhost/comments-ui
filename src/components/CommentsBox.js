@@ -4,6 +4,7 @@ import NotSignedInBox from './NotSignedInBox';
 import Form from './Form';
 import Comment from './Comment';
 import Pagination from './Pagination';
+import FuturePagination from './FuturePagination';
 import NotPaidBox from './NotPaidBox';
 // import Empty from './Empty';
 import Loading from './Loading';
@@ -48,7 +49,7 @@ const CommentsBoxTitle = ({title, showCount, count}) => {
 const CommentsBoxContent = (props) => {
     const [isEditing, setIsEditing] = useState(false);
 
-    const {pagination, member, comments, commentsEnabled, title, showCount} = useContext(AppContext);
+    const {pagination, member, comments, commentsEnabled, title, showCount, focusedComment} = useContext(AppContext);
     const commentsElements = comments.slice().reverse().map(comment => <Comment isEditing={isEditing} comment={comment} key={comment.id} updateIsEditing={setIsEditing} />);
 
     const commentsCount = pagination?.total || 0;
@@ -72,7 +73,21 @@ const CommentsBoxContent = (props) => {
                 });
             }
         }
-    }, []);
+
+        if (focusedComment) {
+            // Only scroll if the user didn't scroll by the time we loaded the comments
+            // We could remove this, but if the network connection is slow, we risk having a page jump when the user already started scrolling
+            if (window.scrollY === 0) { 
+                // This is a bit hacky, but one animation frame is not enough to wait for the iframe height to have changed and the DOM to be updated correctly before scrolling
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        // Make sure the last comments (= focused comment) is aligned instead of the top
+                        elem.scrollIntoView(false);
+                    });
+                });
+            }
+        }
+    });
 
     return (
         <>
@@ -81,6 +96,7 @@ const CommentsBoxContent = (props) => {
             <div className={!pagination ? 'mt-4' : ''}>
                 {commentsCount > 0 && commentsElements}
             </div>
+            <FuturePagination />
             <div>
                 { !isEditing
                     ? (member ? (isPaidMember || !paidOnly ? <Form commentsCount={commentsCount} /> : <NotPaidBox isFirst={commentsCount === 0} />) : <NotSignedInBox isFirst={commentsCount === 0} />)

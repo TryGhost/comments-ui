@@ -54,9 +54,11 @@ export default class App extends React.Component {
             admin: null,
             comments: null,
             pagination: null,
+            futurePagination: null,
             popupNotification: null,
             customSiteUrl: props.customSiteUrl,
             postId: props.postId,
+            focusedComment: null,
             popup: null,
             accentColor: props.accentColor
         };
@@ -69,7 +71,7 @@ export default class App extends React.Component {
         try {
             // Fetch data from API, links, preview, dev sources
             const {site, member} = await this.fetchApiData();
-            const {comments, pagination} = await this.fetchComments();
+            const {comments, pagination, focusedComment, futurePagination} = await this.fetchComments();
 
             const state = {
                 site,
@@ -77,7 +79,9 @@ export default class App extends React.Component {
                 action: 'init:success',
                 initStatus: 'success',
                 comments,
-                pagination
+                focusedComment,
+                pagination,
+                futurePagination
             };
 
             this.setState(state);
@@ -173,6 +177,33 @@ export default class App extends React.Component {
 
     /** Fetch first few comments  */
     async fetchComments() {
+        // Are we currently focused on one comment?
+        if (window.location.hash.startsWith('#comment-')) {
+            const id = window.location.hash.substring('#comment-'.length);
+            try {
+                // todo: filter by post id too
+                const focusedData = await this.GhostApi.comments.read({id});
+                const focusedComment = focusedData.comments[0];
+
+                // Now load the parent/id
+                const parentId = focusedComment.parent?.id ?? focusedComment.id;
+                const data = await this.GhostApi.comments.browse({postId: this.state.postId, after: parentId});
+
+                // Load future data, but set page to 0 and don't add it yet
+                const futureData = await this.GhostApi.comments.browse({postId: this.state.postId, before: parentId, order: 'ASC'});
+                futureData.meta.pagination.page = 0;
+
+                return {
+                    comments: data.comments,
+                    focusedComment,
+                    pagination: data.meta.pagination,
+                    futurePagination: futureData.meta.pagination
+                };
+            } catch (e) {
+                console.error('Failed to focus on comment', id, e);
+            }
+        }
+
         const data = await this.GhostApi.comments.browse({page: 1, postId: this.state.postId});
 
         return {
@@ -277,15 +308,17 @@ export default class App extends React.Component {
 
     /**Get final App level context from App state*/
     getContextFromState() {
-        const {action, popupNotification, customSiteUrl, member, comments, pagination, postId, admin, popup} = this.state;
+        const {action, popupNotification, customSiteUrl, member, comments, pagination, futurePagination, postId, admin, popup, focusedComment} = this.state;
         return {
             action,
             popupNotification,
             customSiteUrl,
             member,
             admin,
+            focusedComment,
             comments,
             pagination,
+            futurePagination,
             postId,
             title: this.props.title,
             showCount: this.props.showCount,

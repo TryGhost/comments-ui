@@ -102,13 +102,19 @@ function setupGhostApi({siteUrl = window.location.origin, apiUrl, apiKey}) {
     let firstCommentsLoadedAt = null;
 
     api.comments = {
-        browse({page, postId}) {
+        browse({page, postId, after, before, order = 'DESC'}) {
             firstCommentsLoadedAt = firstCommentsLoadedAt ?? new Date().toISOString();
+            
+            let filter = encodeURIComponent(`post_id:${postId}+created_at:<=${firstCommentsLoadedAt}`);
+            if (after) {
+                // not really consistent but for POC we use <= here
+                filter = encodeURIComponent(`post_id:${postId}+id:<=${after}`);
+            } else if (before) {
+                filter = encodeURIComponent(`post_id:${postId}+id:>${before}`);
+            }
+            const _order = encodeURIComponent('id ' + order);
 
-            const filter = encodeURIComponent(`post_id:${postId}+created_at:<=${firstCommentsLoadedAt}`);
-            const order = encodeURIComponent('created_at DESC');
-
-            const url = endpointFor({type: 'members', resource: 'comments', params: `?limit=5&order=${order}&filter=${filter}&page=${page}`});
+            const url = endpointFor({type: 'members', resource: 'comments', params: `?limit=5&order=${_order}&filter=${filter}` + (page !== undefined ? `&page=${page}` : ``)});
             return makeRequest({
                 url,
                 method: 'GET',
@@ -141,6 +147,23 @@ function setupGhostApi({siteUrl = window.location.origin, apiUrl, apiKey}) {
                     return res.json();
                 } else {
                     throw new Error('Failed to add comment');
+                }
+            });
+        },
+        read({id}) {
+            const url = endpointFor({type: 'members', resource: `comments/${id}`, params: `?include=member,parent`});
+            return makeRequest({
+                url,
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            }).then(function (res) {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error('Failed to edit comment');
                 }
             });
         },
