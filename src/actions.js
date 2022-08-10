@@ -12,19 +12,32 @@ async function loadMoreComments({state, api}) {
     };
 }
 
+async function loadMoreReplies({state, api, data: comment}) {
+    const data = await api.comments.replies({commentId: comment.id, afterReplyId: comment.replies[comment.replies.length - 1]?.id});
+
+    // Note: we store the comments from new to old, and show them in reverse order
+    return {
+        comments: state.comments.map((c) => {
+            if (c.id === comment.id) {
+                return {
+                    ...comment,
+                    replies: [...comment.replies, ...data.comments],
+                    
+                    // Check if we loaded replies from appendedReplies and remove them if required (we are at the end of pagination in that case)
+                    appendedReplies: comment.appendedReplies?.filter(ar => !data.comments.find(ccc => ccc.id === ar.id))
+                };
+            }
+            return c;
+        })
+    };
+}
+
 async function addComment({state, api, data: comment}) {
     const data = await api.comments.add({comment});
     comment = data.comments[0];
 
-    // Temporary workaround for missing member relation (bug in API)
-    const commentStructured = {
-        ...comment,
-        member: state.member,
-        replies: []
-    };
-
     return {
-        comments: [commentStructured, ...state.comments],
+        comments: [comment, ...state.comments],
         commentCount: state.commentCount + 1
     };
 }
@@ -36,11 +49,9 @@ async function addReply({state, api, data: {reply, parent}}) {
     const data = await api.comments.add({comment});
     comment = data.comments[0];
 
-    // Temporary workaround for missing member relation (bug in API)
-    comment = {
-        ...comment,
-        member: state.member
-    };
+    // When we add a reply,
+    // it is possible that we didn't load all the replies for the given comment yet.
+    // To fix that, we'll save the reply to a different field that is created locally to differentiate between replies before and after pagination 😅
 
     // Replace the comment in the state with the new one
     return {
@@ -48,7 +59,11 @@ async function addReply({state, api, data: {reply, parent}}) {
             if (c.id === parent.id) {
                 return {
                     ...parent,
-                    replies: [...parent.replies, comment]
+                    appendedReplies: [...(parent.appendedReplies ?? []), comment],
+                    count: {
+                        ...parent.count,
+                        replies: parent.count.replies + 1
+                    }
                 };
             }
             return c;
@@ -133,7 +148,10 @@ async function likeComment({state, api, data: comment}) {
                     return {
                         ...r,
                         liked: true,
-                        likes_count: r.likes_count + 1
+                        count: {
+                            ...r.count,
+                            likes: r.count.likes + 1
+                        }
                     };
                 }
 
@@ -144,8 +162,11 @@ async function likeComment({state, api, data: comment}) {
                 return {
                     ...c,
                     liked: true,
-                    likes_count: c.likes_count + 1,
-                    replies
+                    replies,
+                    count: {
+                        ...c.count,
+                        likes: c.count.likes + 1
+                    }
                 };
             }
 
@@ -173,7 +194,10 @@ async function unlikeComment({state, api, data: comment}) {
                     return {
                         ...r,
                         liked: false,
-                        likes_count: r.likes_count - 1
+                        count: {
+                            ...r.count,
+                            likes: r.count.likes - 1
+                        }
                     };
                 }
 
@@ -184,8 +208,11 @@ async function unlikeComment({state, api, data: comment}) {
                 return {
                     ...c,
                     liked: false,
-                    likes_count: c.likes_count - 1,
-                    replies
+                    replies,
+                    count: {
+                        ...c.count,
+                        likes: c.count.likes - 1
+                    }
                 };
             }
             return {
@@ -322,6 +349,7 @@ const Actions = {
     reportComment,
     addReply,
     loadMoreComments,
+    loadMoreReplies,
     updateMember,
     openPopup,
     closePopup
