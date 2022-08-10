@@ -12,8 +12,8 @@ async function loadMoreComments({state, api}) {
     };
 }
 
-async function loadMoreReplies({state, api, data: comment}) {
-    const data = await api.comments.replies({commentId: comment.id, afterReplyId: comment.replies[comment.replies.length - 1]?.id});
+async function loadMoreReplies({state, api, data: {comment, limit}}) {
+    const data = await api.comments.replies({commentId: comment.id, afterReplyId: comment.replies[comment.replies.length - 1]?.id, limit});
 
     // Note: we store the comments from new to old, and show them in reverse order
     return {
@@ -21,10 +21,7 @@ async function loadMoreReplies({state, api, data: comment}) {
             if (c.id === comment.id) {
                 return {
                     ...comment,
-                    replies: [...comment.replies, ...data.comments],
-                    
-                    // Check if we loaded replies from appendedReplies and remove them if required (we are at the end of pagination in that case)
-                    appendedReplies: comment.appendedReplies?.filter(ar => !data.comments.find(ccc => ccc.id === ar.id))
+                    replies: [...comment.replies, ...data.comments]
                 };
             }
             return c;
@@ -59,7 +56,7 @@ async function addReply({state, api, data: {reply, parent}}) {
             if (c.id === parent.id) {
                 return {
                     ...parent,
-                    appendedReplies: [...(parent.appendedReplies ?? []), comment],
+                    replies: [...parent.replies, comment],
                     count: {
                         ...parent.count,
                         replies: parent.count.replies + 1

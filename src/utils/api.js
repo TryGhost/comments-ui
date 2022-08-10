@@ -142,11 +142,11 @@ function setupGhostApi({siteUrl = window.location.origin, apiUrl, apiKey}) {
                 }
             });
         },
-        async replies({page, commentId, afterReplyId}) {
+        async replies({page, commentId, afterReplyId, limit}) {
             const filter = encodeURIComponent(`id:>${afterReplyId}`);
             const order = encodeURIComponent('created_at ASC, id ASC');
 
-            const url = endpointFor({type: 'members', resource: `comments/${commentId}/replies`, params: `?limit=5&order=${order}&filter=${filter}`});
+            const url = endpointFor({type: 'members', resource: `comments/${commentId}/replies`, params: `?limit=${limit ?? 5}&order=${order}&filter=${filter}`});
             const res = await makeRequest({
                 url,
                 method: 'GET',
