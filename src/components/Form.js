@@ -450,7 +450,7 @@ const Form = (props) => {
                         </div>
                     </div>
                     <div className='absolute top-1 left-0 flex h-12 w-full items-center justify-start'>
-                        <div className="grow-0 mr-3">
+                        <div className="mr-3 grow-0">
                             <Avatar comment={comment} className="pointer-events-none" />
                         </div>
                         <div className="grow-1 w-full">

@@ -12,7 +12,7 @@ const Avatar = ({comment, size, isBlank}) => {
     if (isBlank) {
         return (
             <figure className={`relative ${dimensionClasses}`}>
-                <div className={`flex justify-center items-center rounded-full bg-neutral-200 bg-[rgba(200,200,200,0.3)] ${dimensionClasses}`}>
+                <div className={`flex items-center justify-center rounded-full bg-[rgba(200,200,200,0.3)] ${dimensionClasses}`}>
                     <AvatarIcon className="stroke-white dark:opacity-70" />
                 </div>
             </figure>
