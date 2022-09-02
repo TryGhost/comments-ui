@@ -71,12 +71,14 @@ function setupGhostApi({siteUrl = window.location.origin, apiUrl, apiKey}) {
             });
         },
 
-        update({name, bio}) {
+        update({name, expertise}) {
             const url = endpointFor({type: 'members', resource: 'member'});
             const body = {
                 name,
-                bio
+                bio: expertise
             };
+
+            console.log(body); // eslint-disable-line no-console
 
             return makeRequest({
                 url,

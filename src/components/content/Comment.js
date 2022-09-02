@@ -116,16 +116,16 @@ function UnpublishedComment({comment, openEditMode}) {
 
 // Helper components
 
-function MemberBio({comment}) {
+function MemberExpertise({comment}) {
     const {member} = useContext(AppContext);
-    const memberBio = member && comment.member && comment.member.uuid === member.uuid ? member.bio : comment?.member?.bio;
+    const memberExpertise = member && comment.member && comment.member.uuid === member.uuid ? member.bio : comment?.member?.bio;
     
-    if (!memberBio) {
+    if (!memberExpertise) {
         return null;
     }
 
     return (
-        <span>{memberBio}<span className="mx-[0.3em]">·</span></span>
+        <span>{memberExpertise}<span className="mx-[0.3em]">·</span></span>
     );
 }
 
@@ -193,7 +193,7 @@ function CommentHeader({comment}) {
                 <AuthorName comment={comment} />
                 <div className="flex items-baseline pr-4 font-sans text-[14px] tracking-tight text-neutral-400 dark:text-[rgba(255,255,255,0.5)]">
                     <span>
-                        <MemberBio comment={comment}/>
+                        <MemberExpertise comment={comment}/>
                         <span title={formatExplicitTime(comment.created_at)}>{formatRelativeTime(comment.created_at)}</span>
                         <EditedInfo comment={comment} />
                     </span>
