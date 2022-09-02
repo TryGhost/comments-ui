@@ -118,7 +118,7 @@ function UnpublishedComment({comment, openEditMode}) {
 
 function MemberExpertise({comment}) {
     const {member} = useContext(AppContext);
-    const memberExpertise = member && comment.member && comment.member.uuid === member.uuid ? member.bio : comment?.member?.bio;
+    const memberExpertise = member && comment.member && comment.member.uuid === member.uuid ? member.expertise : comment?.member?.expertise;
     
     if (!memberExpertise) {
         return null;
@@ -214,7 +214,7 @@ function CommentBody({html}) {
 
 function CommentMenu({comment, toggleReplyMode, isInReplyMode, openEditMode, parent}) {
     // If this comment is from the current member, always override member
-    // with the member from the context, so we update the bio in existing comments when we change it
+    // with the member from the context, so we update the expertise in existing comments when we change it
     const {member, commentsEnabled} = useContext(AppContext);
 
     const paidOnly = commentsEnabled === 'paid';

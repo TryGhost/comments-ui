@@ -75,10 +75,8 @@ function setupGhostApi({siteUrl = window.location.origin, apiUrl, apiKey}) {
             const url = endpointFor({type: 'members', resource: 'member'});
             const body = {
                 name,
-                bio: expertise
+                expertise
             };
-
-            console.log(body); // eslint-disable-line no-console
 
             return makeRequest({
                 url,

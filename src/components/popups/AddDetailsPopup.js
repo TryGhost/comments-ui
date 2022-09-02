@@ -10,12 +10,12 @@ const AddDetailsPopup = (props) => {
     const {dispatchAction, member, accentColor} = useContext(AppContext);
 
     const [name, setName] = useState(member.name ?? '');
-    const [expertise, setExpertise] = useState(member.bio ?? '');
+    const [expertise, setExpertise] = useState(member.expertise ?? '');
 
     const maxExpertiseChars = 50;
     let initialExpertiseChars = maxExpertiseChars;
-    if (member.bio) {
-        initialExpertiseChars -= member.bio.length;
+    if (member.expertise) {
+        initialExpertiseChars -= member.expertise.length;
     }
     const [expertiseCharsLeft, setExpertiseCharsLeft] = useState(initialExpertiseChars);
 

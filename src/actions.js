@@ -285,8 +285,6 @@ async function editComment({state, api, data: {comment, parent}}) {
 }
 
 async function updateMember({data, state, api}) {
-    console.log(state); // eslint-disable-line no-console
-    console.log(data); // eslint-disable-line no-console
     const {name, expertise} = data;
     const patchData = {};
     
@@ -296,8 +294,8 @@ async function updateMember({data, state, api}) {
         patchData.name = name;
     }
 
-    const originalBio = state?.member?.bio;
-    if (expertise !== undefined && originalBio !== expertise) {
+    const originalExpertise = state?.member?.expertise;
+    if (expertise !== undefined && originalExpertise !== expertise) {
         // Allow to set it to an empty string or to null
         patchData.expertise = expertise;
     }

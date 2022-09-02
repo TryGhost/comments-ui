@@ -22,7 +22,7 @@ const Form = (props) => {
 
     const {comment, commentsCount} = props;
     const memberName = member?.name ?? comment?.member?.name;
-    const memberExpertise = member?.bio ?? comment?.member?.bio;
+    const memberExpertise = member?.expertise ?? comment?.member?.expertise;
 
     // Keep track of the amount of open forms
     useEffect(() => {
