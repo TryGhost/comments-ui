@@ -207,9 +207,6 @@ export default class App extends React.Component {
             try {
                 data = JSON.parse(event.data);
             } catch (err) {
-                /* eslint-disable no-console */
-                console.error('Error parsing event data', err);
-                /* eslint-enable no-console */
                 return;
             }
 
