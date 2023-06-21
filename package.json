@@ -68,7 +68,7 @@
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "12.1.5",
     "@testing-library/user-event": "14.4.3",
-    "autoprefixer": "10.4.8",
+    "autoprefixer": "10.4.14",
     "bson-objectid": "2.0.3",
     "chalk": "4.1.2",
     "chokidar": "3.5.2",
